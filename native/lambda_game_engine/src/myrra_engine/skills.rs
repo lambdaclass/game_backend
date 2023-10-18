@@ -68,7 +68,7 @@ impl Default for Skill {
             name: "Slingshot".to_string(),
             cooldown_ms: 1000,
             damage: 10,
-            duration: 0,
+            duration: 9999,
             skill_range: 100.0,
             par1: 0,
             par1desc: "".to_string(),
