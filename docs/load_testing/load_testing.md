@@ -10,7 +10,7 @@ Our current methodology is to use 2 servers to load test:
 
 Some things to keep in mind about load tests:
 - Always write a report, and every report must go to:
-  server/load_test/reports/your_report.md, this is important 
+  ./load_test/reports/your_report.md, this is important 
   to keep track of possible performance regressions.
 - Always write down the specs + OS + config from where you're running the tests.
   For example, did you change linux's governor settings? Write it down.
@@ -95,7 +95,7 @@ is to open htop, you should see the virtual cores as 'offline'.
    the corresponding port.
 4. Run:
    ```sh
-       cd ./curse_of_myrra/server/load_test/ && iex -S mix 
+       cd ./game_backend/load_test/ && iex -S mix 
    ``` 
    this drops you into an Elixir shell from which you'll run the load tests.
 5. From the elixir shell, start the load test with:
