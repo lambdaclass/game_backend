@@ -19,10 +19,9 @@ defmodule DarkWorldsServer.Application do
       # Start the Endpoint (http/https)
       DarkWorldsServerWeb.Endpoint,
       # Start the Runner Supervisor
-      DarkWorldsServer.RunnerSupervisor,
+      DarkWorldsServer.AutoBattler.RunnerSupervisor,
       # Start the matchmaking supervisor
-      DarkWorldsServer.Matchmaking.MatchingCoordinator,
-      DarkWorldsServer.Bot.BotClientSupervisor
+      DarkWorldsServer.AutoBattler.Bot.BotSupervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
