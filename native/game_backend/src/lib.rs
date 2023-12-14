@@ -1,6 +1,7 @@
 #![allow(non_snake_case)] // rustler macros generate non snake case names and dont use this allow themselves
 
 mod character;
+mod collisionable;
 mod config;
 mod effect;
 mod game;
@@ -10,6 +11,7 @@ mod player;
 mod projectile;
 mod skill;
 
+use crate::collisionable::MapCollisionable;
 use crate::config::Config;
 use crate::game::{EntityOwner, GameError, GameState};
 use crate::map::Position;
@@ -20,6 +22,11 @@ use std::collections::HashMap;
 #[rustler::nif()]
 fn parse_config(data: String) -> Config {
     config::parse_config(&data)
+}
+
+#[rustler::nif()]
+fn parse_map_collisionables(data: String) -> Vec<MapCollisionable> {
+    collisionable::parse_map_collisionables(&data)
 }
 
 #[rustler::nif()]
@@ -118,6 +125,7 @@ rustler::init!(
     "Elixir.GameBackend",
     [
         parse_config,
+        parse_map_collisionables,
         new_game,
         add_player,
         move_player,

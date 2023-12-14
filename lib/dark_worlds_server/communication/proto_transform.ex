@@ -12,6 +12,8 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
   alias DarkWorldsServer.Communication.Proto.GameStateConfig
   alias DarkWorldsServer.Communication.Proto.KillEvent
   alias DarkWorldsServer.Communication.Proto.LootPackage
+  alias DarkWorldsServer.Communication.Proto.MapCollisionable
+  alias DarkWorldsServer.Communication.Proto.MapCollisionables
   alias DarkWorldsServer.Communication.Proto.MapModification
   alias DarkWorldsServer.Communication.Proto.Mechanic
   alias DarkWorldsServer.Communication.Proto.Modification
@@ -152,6 +154,19 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
     }
   end
 
+  def encode(map_collisionables, MapCollisionables) do
+    map_collisionables
+  end
+
+  def encode(map_collisionable, MapCollisionable) do
+    %MapCollisionable{
+      id: map_collisionable.id,
+      position: map_collisionable.position,
+      collisionable_type: map_collisionable_type_encode(map_collisionable.collisionable_type),
+      radius: map_collisionable.radius
+    }
+  end
+
   def encode(data, _struct) do
     data
   end
@@ -161,6 +176,14 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
   ###########
 
   def decode(config, Config) do
+    config
+  end
+
+  def decode(config, MapCollisionable) do
+    config
+  end
+
+  def decode(config, MapCollisionables) do
     config
   end
 
@@ -392,4 +415,6 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
   defp mechanic_name_encode(:simple_shoot), do: :SIMPLE_SHOOT
   defp mechanic_name_encode(:multi_shoot), do: :MULTI_SHOOT
   defp mechanic_name_encode(:give_effect), do: :GIVE_EFFECT
+
+  defp map_collisionable_type_encode(:circular_section), do: :CIRCULAR_SECTION
 end

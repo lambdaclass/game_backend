@@ -239,6 +239,7 @@ message LobbyEvent {
     uint64 host_player_id = 11;
     uint64 amount_of_players = 12;
     uint64 capacity = 13;
+    repeated MapCollisionable map_collisionables = 14;
 }
 
 /* Represents the information of a player/client
@@ -440,6 +441,17 @@ message Config {
   repeated GameLoot loots = 4;
   repeated GameProjectile projectiles = 5;
   repeated GameSkill skills = 6;
+}
+
+message MapCollisionable {
+    uint64 id = 1;
+    CollisionableType collisionable_type = 2;
+    Position position = 3;
+    uint64 radius = 4;
+}
+
+enum CollisionableType {
+    CIRCULAR_SECTION = 0;
 }
 
 /* Represents the initial game state.
