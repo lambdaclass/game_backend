@@ -34,6 +34,7 @@ pub struct Player {
     pub skills_keys_to_execute: Vec<String>,
     pub inventory: Vec<Option<Loot>>,
     next_actions: Vec<Action>,
+    pub moving: bool,
 }
 
 #[derive(NifTaggedEnum, Clone, PartialEq, Eq)]
@@ -68,6 +69,7 @@ impl Player {
             character: character_config,
             action_duration_ms: 0,
             next_actions: Vec::new(),
+            moving: false,
             skills_keys_to_execute: Vec::new(),
         }
     }
@@ -76,17 +78,16 @@ impl Player {
         self.kill_count += 1;
     }
 
-    pub fn move_position(&mut self, angle_degrees: f32, config: &Config) {
+    pub fn move_position(&mut self, config: &Config) {
         // A speed of 0 (or less) means the player can't move (e.g. paralyzed, frozen, etc)
-        if self.speed == 0 {
+        if self.speed == 0 || !self.moving {
             return;
         }
 
         self.add_action(Action::Moving, 0);
-        self.direction = angle_degrees;
         self.position = map::next_position(
             &self.position,
-            angle_degrees,
+            self.direction,
             self.speed as f32,
             config.game.width as f32,
         );

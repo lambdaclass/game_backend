@@ -6,7 +6,7 @@ defmodule DarkWorldsServer.RunnerSupervisor.Runner do
   alias DarkWorldsServer.Communication.Proto.UseSkill
 
   # This is the amount of time between state updates in milliseconds
-  @game_tick_rate_ms 20
+  @game_tick_rate_ms 30
   # Amount of time between loot spawn
   @loot_spawn_rate_ms 20_000
   # Amount of time between loot spawn
@@ -118,9 +118,9 @@ defmodule DarkWorldsServer.RunnerSupervisor.Runner do
   end
 
   @impl true
-  def handle_cast({:move, user_id, %Move{angle: angle}, timestamp}, state) do
+  def handle_cast({:move, user_id, %Move{angle: angle, moving: moving}, timestamp}, state) do
     player_id = state.user_to_player[user_id] || user_id
-    game_state = GameBackend.move_player(state.game_state, player_id, angle)
+    game_state = GameBackend.move_player(state.game_state, player_id, angle, moving)
 
     state =
       Map.put(state, :game_state, game_state)
