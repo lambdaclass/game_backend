@@ -16,7 +16,8 @@
         }
       ],
       "projectile_attributes": [],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
     },
     {
       "name": "heal_30",
@@ -30,7 +31,8 @@
         }
       ],
       "projectile_attributes": [],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
     },
     {
       "name": "h4ck_dos",
@@ -59,7 +61,8 @@
           "value": "false"
         }
       ],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
     },
     {
       "name": "leap_effect",
@@ -97,7 +100,8 @@
         }
       ],
       "projectile_attributes": [],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
     },
     {
       "name": "poison",
@@ -117,7 +121,8 @@
         }
       ],
       "projectile_attributes": [],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
     },
     {
       "name": "auto_slingshot",
@@ -131,7 +136,8 @@
       },
       "player_attributes": [],
       "projectile_attributes": [],
-      "skills_keys_to_execute": ["4"]
+      "skills_keys_to_execute": ["4"],
+      "skills_to_execute": []
     },
     {
       "name": "muflus_hit_delay",
@@ -151,7 +157,23 @@
         }
       ],
       "projectile_attributes": [],
-      "skills_keys_to_execute": []
+      "skills_keys_to_execute": [],
+      "skills_to_execute": []
+    },
+    {
+      "name": "uma_auto_attack",
+      "is_reversable": false,
+      "effect_time_type": {
+        "Periodic": {
+          "instant_applicaiton": true,
+          "interval_ms": 300,
+          "trigger_count": 3
+        }
+      },
+      "player_attributes": [],
+      "projectile_attributes": [],
+      "skills_keys_to_execute": [],
+      "skills_to_execute": ["uma_hit"]
     }
   ],
   "loots": [
@@ -229,6 +251,35 @@
             "range": 975,
             "cone_angle": 120,
             "on_hit_effects": ["muflus_hit_delay"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "uma_basic",
+      "cooldown_ms": 2000,
+      "execution_duration_ms": 900,
+      "is_passive": false,
+      "mechanics": [
+        {
+          "GiveEffect": {
+            "effects_to_give": ["uma_auto_attack"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "uma_hit",
+      "cooldown_ms": 0,
+      "execution_duration_ms": 0,
+      "is_passive": false,
+      "mechanics": [
+        {
+          "Hit": {
+            "damage": 8,
+            "range": 500,
+            "cone_angle": 120,
+            "on_hit_effects": []
           }
         }
       ]
@@ -325,6 +376,18 @@
         "1": "hit",
         "2": "leap",
         "3": "circle_hit"
+      }
+    },
+    {
+      "name": "uma",
+      "active": true,
+      "base_speed": 30,
+      "base_size": 100,
+      "base_health": 100,
+      "max_inventory_size": 1,
+      "skills": {
+        "1": "uma_basic",
+        "2": "circle_hit"
       }
     }
   ],
