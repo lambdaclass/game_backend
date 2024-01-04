@@ -43,6 +43,7 @@ defmodule DarkWorldsServer.Matchmaking.MatchingCoordinator do
 
   def handle_call({:join, user_id}, {from, _}, %{players: players} = state) do
     if Enum.any?(players, fn {player_user_id, _} -> player_user_id == user_id end) do
+      notify_player_joined(players, {user_id, from})
       {:reply, :ok, state}
     else
       players = [{user_id, from} | state.players]
@@ -112,8 +113,20 @@ defmodule DarkWorldsServer.Matchmaking.MatchingCoordinator do
     amount = length(players)
 
     players
-    |> Enum.each(fn {_, client_pid} ->
+    |> Enum.each(fn {_user_id, client_pid} ->
       Process.send(client_pid, {:notify_players_amount, amount, capacity}, [])
+    end)
+  end
+
+  defp notify_player_joined(players, {player_id, _from}) do
+    # TODO
+    # Replace this random with a getter to the user's selected character and name
+    player_name = Enum.random(["Juan", "Pablo", "Pedro"])
+    character_name = Enum.random(["muflus"])
+
+    players
+    |> Enum.each(fn {_, client_pid} ->
+      Process.send(client_pid, {:player_added, player_id, player_name, character_name, players}, [])
     end)
   end
 

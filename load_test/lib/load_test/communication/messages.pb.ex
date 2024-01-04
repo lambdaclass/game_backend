@@ -407,11 +407,7 @@ defmodule LoadTest.Communication.Proto.OldGameEvent do
   field(:projectiles, 4, repeated: true, type: LoadTest.Communication.Proto.OldProjectile)
   field(:player_joined_id, 5, type: :uint64, json_name: "playerJoinedId")
   field(:player_joined_name, 6, type: :string, json_name: "playerJoinedName")
-
-  field(:winner_player, 7,
-    type: LoadTest.Communication.Proto.OldPlayer,
-    json_name: "winnerPlayer"
-  )
+  field(:winner_player, 7, type: LoadTest.Communication.Proto.OldPlayer, json_name: "winnerPlayer")
 
   field(:selected_characters, 8,
     repeated: true,
@@ -461,12 +457,7 @@ defmodule LoadTest.Communication.Proto.OldPlayer do
   field(:position, 3, type: LoadTest.Communication.Proto.OldPosition)
   field(:status, 4, type: LoadTest.Communication.Proto.OldStatus, enum: true)
   field(:action, 5, repeated: true, type: LoadTest.Communication.Proto.OldActionTracker)
-
-  field(:aoe_position, 6,
-    type: LoadTest.Communication.Proto.OldPosition,
-    json_name: "aoePosition"
-  )
-
+  field(:aoe_position, 6, type: LoadTest.Communication.Proto.OldPosition, json_name: "aoePosition")
   field(:kill_count, 7, type: :uint64, json_name: "killCount")
   field(:death_count, 8, type: :uint64, json_name: "deathCount")
 
@@ -618,9 +609,8 @@ defmodule LoadTest.Communication.Proto.LobbyEvent do
 
   field(:game_config, 9, type: LoadTest.Communication.Proto.Config, json_name: "gameConfig")
   field(:server_hash, 10, type: :string, json_name: "serverHash")
-  field(:host_player_id, 11, type: :uint64, json_name: "hostPlayerId")
-  field(:amount_of_players, 12, type: :uint64, json_name: "amountOfPlayers")
-  field(:capacity, 13, type: :uint64)
+  field(:amount_of_players, 11, type: :uint64, json_name: "amountOfPlayers")
+  field(:capacity, 12, type: :uint64)
 end
 
 defmodule LoadTest.Communication.Proto.PlayerInformation do
@@ -630,6 +620,7 @@ defmodule LoadTest.Communication.Proto.PlayerInformation do
 
   field(:player_id, 1, type: :uint64, json_name: "playerId")
   field(:player_name, 2, type: :string, json_name: "playerName")
+  field(:character_name, 3, type: :string, json_name: "characterName")
 end
 
 defmodule LoadTest.Communication.Proto.RunnerConfig do
