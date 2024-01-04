@@ -489,6 +489,17 @@ defmodule DarkWorldsServer.Communication.Proto.OldPlayer.EffectsEntry do
   def transform_module(), do: DarkWorldsServer.Communication.ProtoTransform
 end
 
+defmodule DarkWorldsServer.Communication.Proto.OldPlayer.AvailableBurstLoadsEntry do
+  @moduledoc false
+
+  use Protobuf, map: true, syntax: :proto3, protoc_gen_elixir_version: "0.12.0"
+
+  field(:key, 1, type: :string)
+  field(:value, 2, type: :uint64)
+
+  def transform_module(), do: DarkWorldsServer.Communication.ProtoTransform
+end
+
 defmodule DarkWorldsServer.Communication.Proto.OldPlayer do
   @moduledoc false
 
@@ -545,6 +556,13 @@ defmodule DarkWorldsServer.Communication.Proto.OldPlayer do
   field(:body_size, 17, type: :float, json_name: "bodySize")
   field(:inventory, 18, repeated: true, type: DarkWorldsServer.Communication.Proto.GameLoot)
   field(:speed, 19, type: :uint64)
+
+  field(:available_burst_loads, 20,
+    repeated: true,
+    type: DarkWorldsServer.Communication.Proto.OldPlayer.AvailableBurstLoadsEntry,
+    json_name: "availableBurstLoads",
+    map: true
+  )
 
   def transform_module(), do: DarkWorldsServer.Communication.ProtoTransform
 end
@@ -1029,6 +1047,7 @@ defmodule DarkWorldsServer.Communication.Proto.GameSkill do
   field(:cooldown_ms, 2, type: :uint64, json_name: "cooldownMs")
   field(:is_passive, 3, type: :bool, json_name: "isPassive")
   field(:mechanics, 4, repeated: true, type: DarkWorldsServer.Communication.Proto.Mechanic)
+  field(:burst_loads, 5, type: :uint64, json_name: "burstLoads")
 
   def transform_module(), do: DarkWorldsServer.Communication.ProtoTransform
 end

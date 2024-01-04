@@ -85,7 +85,8 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
       direction: direction,
       body_size: body_size,
       inventory: inventory,
-      speed: speed
+      speed: speed,
+      available_burst_loads: available_burst_loads
     } = player
 
     %ProtoPlayer{
@@ -107,7 +108,8 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
       direction: direction,
       body_size: body_size,
       inventory: inventory,
-      speed: speed
+      speed: speed,
+      available_burst_loads: available_burst_loads
     }
   end
 
@@ -329,7 +331,8 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
       effects: effects,
       direction: direction,
       body_size: body_size,
-      inventory: inventory
+      inventory: inventory,
+      available_burst_loads: available_burst_loads
     } = player
 
     %GamePlayer{
@@ -350,7 +353,8 @@ defmodule DarkWorldsServer.Communication.ProtoTransform do
       effects: effects,
       direction: direction,
       body_size: body_size,
-      inventory: inventory
+      inventory: inventory,
+      available_burst_loads: available_burst_loads
     }
   end
 

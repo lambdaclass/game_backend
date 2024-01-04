@@ -290,140 +290,132 @@ impl GameState {
             .partition(|player| player.id == player_id);
 
         if let Some(player) = player_in_list.get_mut(0) {
-            // Check if player is still performing an action
-            if !player.can_do_action() {
-                return;
-            }
+            if player.can_perform_attack(&skill_key) {
+                if let Some(skill) = player.character.clone().skills.get(&skill_key) {
+                    let mut execution_duration_ms = skill.execution_duration_ms;
+                    player.add_cooldown(&skill_key, skill.cooldown_ms);
 
-            // Check if skill is still on cooldown
-            if player.cooldowns.contains_key(&skill_key) {
-                return;
-            }
+                    player.direction =
+                        get_direction_angle(player, &other_players, &skill_params, &self.config);
 
-            if let Some(skill) = player.character.clone().skills.get(&skill_key) {
-                let mut execution_duration_ms = skill.execution_duration_ms;
-                player.add_cooldown(&skill_key, skill.cooldown_ms);
-
-                player.direction =
-                    get_direction_angle(player, &other_players, &skill_params, &self.config);
-
-                for mechanic in skill.mechanics.iter() {
-                    match mechanic {
-                        SkillMechanic::SimpleShoot {
-                            projectile: projectile_config,
-                        } => {
-                            let id = get_next_id(&mut self.next_id);
-
-                            let projectile = Projectile::new(
-                                id,
-                                player.position,
-                                player.direction,
-                                player.id,
-                                projectile_config,
-                            );
-                            self.projectiles.push(projectile);
-                        }
-                        SkillMechanic::MultiShoot {
-                            projectile: projectile_config,
-                            count,
-                            cone_angle,
-                        } => {
-                            let direction_distribution =
-                                distribute_angle(player.direction, cone_angle, count);
-                            for direction in direction_distribution {
+                    for mechanic in skill.mechanics.iter() {
+                        match mechanic {
+                            SkillMechanic::SimpleShoot {
+                                projectile: projectile_config,
+                            } => {
                                 let id = get_next_id(&mut self.next_id);
+
                                 let projectile = Projectile::new(
                                     id,
                                     player.position,
-                                    direction,
+                                    player.direction,
                                     player.id,
                                     projectile_config,
                                 );
                                 self.projectiles.push(projectile);
                             }
-                        }
-                        SkillMechanic::GiveEffect { effects_to_give } => {
-                            for effect in effects_to_give.iter() {
-                                player.apply_effect(effect, EntityOwner::Player(player.id));
+                            SkillMechanic::MultiShoot {
+                                projectile: projectile_config,
+                                count,
+                                cone_angle,
+                            } => {
+                                let direction_distribution =
+                                    distribute_angle(player.direction, cone_angle, count);
+                                for direction in direction_distribution {
+                                    let id = get_next_id(&mut self.next_id);
+                                    let projectile = Projectile::new(
+                                        id,
+                                        player.position,
+                                        direction,
+                                        player.id,
+                                        projectile_config,
+                                    );
+                                    self.projectiles.push(projectile);
+                                }
                             }
-                        }
-                        SkillMechanic::Hit {
-                            damage,
-                            range,
-                            cone_angle,
-                            on_hit_effects,
-                        } => {
-                            let mut damage = *damage;
+                            SkillMechanic::GiveEffect { effects_to_give } => {
+                                for effect in effects_to_give.iter() {
+                                    player.apply_effect(effect, EntityOwner::Player(player.id));
+                                }
+                            }
+                            SkillMechanic::Hit {
+                                damage,
+                                range,
+                                cone_angle,
+                                on_hit_effects,
+                            } => {
+                                let mut damage = *damage;
 
-                            for (effect, _owner) in player.effects.iter() {
-                                for change in effect.player_attributes.iter() {
-                                    if change.attribute == "damage" {
-                                        effect::modify_attribute(&mut damage, change)
+                                for (effect, _owner) in player.effects.iter() {
+                                    for change in effect.player_attributes.iter() {
+                                        if change.attribute == "damage" {
+                                            effect::modify_attribute(&mut damage, change)
+                                        }
                                     }
                                 }
+
+                                other_players
+                                    .iter_mut()
+                                    .filter(|target_player| {
+                                        player.is_targetable()
+                                            && map::in_cone_angle_range(
+                                                player,
+                                                target_player,
+                                                *range,
+                                                *cone_angle as f32,
+                                            )
+                                    })
+                                    .for_each(|target_player| {
+                                        self.pending_damages.push(DamageTracker {
+                                            attacked_id: target_player.id,
+                                            attacker: EntityOwner::Player(player.id),
+                                            damage: damage as i64,
+                                            on_hit_effects: on_hit_effects.clone(),
+                                        });
+                                    })
                             }
-
-                            other_players
-                                .iter_mut()
-                                .filter(|target_player| {
-                                    player.is_targetable()
-                                        && map::in_cone_angle_range(
-                                            player,
-                                            target_player,
-                                            *range,
-                                            *cone_angle as f32,
-                                        )
-                                })
-                                .for_each(|target_player| {
-                                    self.pending_damages.push(DamageTracker {
-                                        attacked_id: target_player.id,
-                                        attacker: EntityOwner::Player(player.id),
-                                        damage: damage as i64,
-                                        on_hit_effects: on_hit_effects.clone(),
-                                    });
-                                })
-                        }
-                        SkillMechanic::MoveToTarget {
-                            duration_ms: _,
-                            max_range,
-                            on_arrival_skills,
-                            effects_to_remove_on_arrival,
-                        } => {
-                            let (mut amount, auto_aim) =
-                                parse_skill_params_move_to_target(&skill_params);
-
-                            if auto_aim {
-                                let nearest_player: Option<Position> = nearest_player_position(
-                                    &other_players,
-                                    &player.position,
-                                    self.config.game.auto_aim_max_distance,
-                                );
-
-                                amount = 1.;
-                                if let Some(target_player_position) = nearest_player {
-                                    let distance = map::distance_between_positions(
-                                        &target_player_position,
-                                        &player.position,
-                                    );
-                                    amount = (distance / (*max_range as f32)).clamp(0., 1.);
-                                }
-                            }
-
-                            let distance = (*max_range as f32 * amount) as u64;
-
-                            execution_duration_ms =
-                                (distance / player.speed) * self.config.game.tick_interval_ms;
-
-                            player.set_moving_params(
-                                execution_duration_ms,
-                                player.speed as f32,
+                            SkillMechanic::MoveToTarget {
+                                duration_ms: _,
+                                max_range,
                                 on_arrival_skills,
                                 effects_to_remove_on_arrival,
-                            );
+                            } => {
+                                let (mut amount, auto_aim) =
+                                    parse_skill_params_move_to_target(&skill_params);
+
+                                if auto_aim {
+                                    let nearest_player: Option<Position> = nearest_player_position(
+                                        &other_players,
+                                        &player.position,
+                                        self.config.game.auto_aim_max_distance,
+                                    );
+
+                                    amount = 1.;
+                                    if let Some(target_player_position) = nearest_player {
+                                        let distance = map::distance_between_positions(
+                                            &target_player_position,
+                                            &player.position,
+                                        );
+                                        amount = (distance / (*max_range as f32)).clamp(0., 1.);
+                                    }
+                                }
+
+                                let distance = (*max_range as f32 * amount) as u64;
+
+                                execution_duration_ms =
+                                    (distance / player.speed) * self.config.game.tick_interval_ms;
+
+                                player.set_moving_params(
+                                    execution_duration_ms,
+                                    player.speed as f32,
+                                    on_arrival_skills,
+                                    effects_to_remove_on_arrival,
+                                );
+                            }
                         }
                     }
+                    player.add_action(Action::UsingSkill(skill_key.clone()), execution_duration_ms);
                 }
-                player.add_action(Action::UsingSkill(skill_key.clone()), execution_duration_ms);
             }
         }
     }

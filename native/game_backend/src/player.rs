@@ -1,3 +1,4 @@
+use std::cmp::min;
 use std::collections::HashMap;
 
 use itertools::Itertools;
@@ -14,6 +15,7 @@ use crate::game::EntityOwner;
 use crate::loot::Loot;
 use crate::map;
 use crate::map::Position;
+use crate::skill::SkillConfig;
 use crate::skill::SkillMovingParams;
 
 #[derive(NifMap, Clone)]
@@ -28,6 +30,7 @@ pub struct Player {
     pub action: Vec<ActionTracker>,
     pub health: u64,
     pub cooldowns: HashMap<String, u64>,
+    pub available_burst_loads: HashMap<String, u64>,
     pub effects: Vec<(Effect, EntityOwner)>,
     pub size: u64,
     pub speed: u64,
@@ -67,6 +70,7 @@ impl Player {
             direction: 0.0,
             action: Vec::new(),
             cooldowns: HashMap::new(),
+            available_burst_loads: map_skills_burst_loads(&character_config.skills),
             effects: Vec::new(),
             health: character_config.base_health,
             speed: character_config.base_speed,
@@ -155,14 +159,40 @@ impl Player {
     }
 
     pub fn add_cooldown(&mut self, skill_key: &String, cooldown_ms: u64) {
-        self.cooldowns.insert(skill_key.to_string(), cooldown_ms);
+        self.cooldowns
+            .entry(skill_key.to_string())
+            .or_insert(cooldown_ms);
+
+        self.available_burst_loads
+            .entry(skill_key.to_string())
+            .and_modify(|load| {
+                *load = load.saturating_sub(1);
+            });
     }
 
     pub fn reduce_cooldowns(&mut self, elapsed_time_ms: u64) {
-        self.cooldowns.retain(|_key, remaining| {
+        self.cooldowns.retain(|key, remaining| {
             *remaining = remaining.saturating_sub(elapsed_time_ms);
+            if *remaining == 0 {
+                self.available_burst_loads
+                    .entry(key.to_string())
+                    .and_modify(|load| {
+                        *load = min(*load + 1, self.character.skills[key].burst_loads);
+                    });
+            }
             *remaining > 0
         });
+
+        self.available_burst_loads
+            .iter_mut()
+            .for_each(|(key, load)| {
+                if *load < self.character.skills[key].burst_loads
+                    && !self.cooldowns.contains_key(key)
+                {
+                    self.cooldowns
+                        .insert(key.to_string(), self.character.skills[key].cooldown_ms);
+                }
+            });
     }
 
     pub fn apply_effects_if_not_present(
@@ -398,6 +428,15 @@ impl Player {
     pub const fn is_targetable(&self) -> bool {
         self.skill_moving_params.is_none()
     }
+
+    pub fn can_perform_attack(&self, skill_key: &String) -> bool {
+        // Check if player is still performing an action or if an attack can be performed with the given skill.
+        self.can_do_action() && (can_use_skill(self, skill_key))
+    }
+}
+
+fn can_use_skill(player: &Player, skill_key: &String) -> bool {
+    player.available_burst_loads[skill_key] > 0
 }
 
 fn update_status(player: &mut Player) {
@@ -431,4 +470,11 @@ fn revert_attribute(attribute_value: &mut u64, modifier: &AttributeModifier, val
         // We are not handling the possibility to revert an Override effect because we are not storing the previous value.
         _ => todo!(),
     }
+}
+
+fn map_skills_burst_loads(skills: &HashMap<String, SkillConfig>) -> HashMap<String, u64> {
+    skills
+        .iter()
+        .map(|(key, skill)| (key.to_string(), skill.burst_loads))
+        .collect()
 }
