@@ -48,6 +48,7 @@ defmodule DarkWorldsServerWeb.Router do
     get "/:device_client_id/get_units/", UserController, :get_units
     put "/:device_client_id/select_unit/:unit_id", UserController, :add_selected_unit
     put "/:device_client_id/unselect_unit/:unit_id", UserController, :remove_selected_unit
+    put "/:device_client_id/username/edit", UserController, :update_player_username
   end
 
   scope "/", DarkWorldsServerWeb do

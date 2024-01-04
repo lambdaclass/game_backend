@@ -382,4 +382,10 @@ defmodule DarkWorldsServer.Accounts do
   def get_users_count() do
     Repo.aggregate(User, :count)
   end
+
+  def update_user_username(user, username) do
+    user
+    |> User.username_changeset(%{username: username})
+    |> Repo.update()
+  end
 end

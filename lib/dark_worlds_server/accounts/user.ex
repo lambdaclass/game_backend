@@ -52,6 +52,11 @@ defmodule DarkWorldsServer.Accounts.User do
     |> unique_constraint(:device_client_id)
   end
 
+  def username_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:username])
+  end
+
   defp validate_email(changeset, opts) do
     changeset
     |> validate_required([:email])

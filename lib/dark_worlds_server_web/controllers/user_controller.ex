@@ -14,9 +14,10 @@ defmodule DarkWorldsServerWeb.UserController do
 
   def create_user(conn, %{
         "device_client_id" => device_client_id,
-        "selected_character" => selected_character
+        "selected_character" => selected_character,
+        "username" => username
       }) do
-    user_params = create_user_data(device_client_id)
+    user_params = create_user_data(device_client_id, username)
 
     case Accounts.register_user(user_params) do
       {:ok, user} ->
@@ -58,6 +59,25 @@ defmodule DarkWorldsServerWeb.UserController do
 
           {:error, _changeset} ->
             json(conn, %{error: "An error has occurred"})
+        end
+    end
+  end
+
+  def update_player_username(
+        conn,
+        %{"device_client_id" => device_client_id, "username" => username}
+      ) do
+    case Accounts.get_user_by_device_client_id(device_client_id) do
+      nil ->
+        json(conn, %{error: "INEXISTENT_USER"})
+
+      user ->
+        case Accounts.update_user_username(user, username) do
+          {:ok, user} ->
+            json(conn, user_response(user))
+
+          {:error, _changeset} ->
+            json(conn, %{error: "An error has ocurred"})
         end
     end
   end
@@ -137,20 +157,22 @@ defmodule DarkWorldsServerWeb.UserController do
   defp user_response(nil) do
     %{
       device_client_id: "NOT_FOUND",
-      selected_character: "NOT_FOUND"
+      selected_character: "NOT_FOUND",
+      username: "NOT_FOUND"
     }
   end
 
-  defp user_response(%User{device_client_id: device_client_id} = user) do
+  defp user_response(%User{device_client_id: device_client_id, username: username} = user) do
     selected_unit = Units.get_selected_unit(user.id)
 
     %{
       device_client_id: device_client_id,
-      selected_character: Utils.Characters.character_name_to_game_character_name(selected_unit.character.name)
+      selected_character: Utils.Characters.character_name_to_game_character_name(selected_unit.character.name),
+      username: username
     }
   end
 
-  defp create_user_data(device_client_id) do
+  defp create_user_data(device_client_id, username) do
     provisional_password = UUID.uuid4()
     user = UUID.uuid4()
 
@@ -158,7 +180,8 @@ defmodule DarkWorldsServerWeb.UserController do
       email: "test_#{user}@mail.com",
       password: provisional_password,
       device_client_id: device_client_id,
-      username: "user_#{user}"
+      user: "user_#{user}",
+      username: username
     }
   end
 end
