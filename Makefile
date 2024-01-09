@@ -21,7 +21,8 @@ generate-ex-protos:
 		messages.proto
 
 generate-js-protos:
-	protoc messages.proto --js_out=import_style=commonjs:assets/js/protobuf
+	protoc messages.proto \
+	--js_out=import_style=commonjs:lambda_game_backend_web/assets/js/protobuf
 
 generate-protos: generate-ex-protos generate-js-protos
 

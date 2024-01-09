@@ -8,7 +8,7 @@ defmodule LambdaGameBackend.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      LambdaGameBackendWeb.Telemetry,
+      # LambdaGameBackendWeb.Telemetry,
       LambdaGameBackend.Repo,
       {DNSCluster, query: Application.get_env(:lambda_game_backend, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: LambdaGameBackend.PubSub},
@@ -19,7 +19,7 @@ defmodule LambdaGameBackend.Application do
       # Start a worker by calling: LambdaGameBackend.Worker.start_link(arg)
       # {LambdaGameBackend.Worker, arg},
       # Start to serve requests, typically the last entry
-      LambdaGameBackendWeb.Endpoint
+      # LambdaGameBackendWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
@@ -28,11 +28,11 @@ defmodule LambdaGameBackend.Application do
     Supervisor.start_link(children, opts)
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
-  @impl true
-  def config_change(changed, _new, removed) do
-    LambdaGameBackendWeb.Endpoint.config_change(changed, removed)
-    :ok
-  end
+  # # Tell Phoenix to update the endpoint configuration
+  # # whenever the application is updated.
+  # @impl true
+  # def config_change(changed, _new, removed) do
+  #   LambdaGameBackendWeb.Endpoint.config_change(changed, removed)
+  #   :ok
+  # end
 end

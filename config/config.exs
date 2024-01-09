@@ -16,12 +16,12 @@ dispatch = [
   ]
 ]
 
-config :lambda_game_backend,
+config :lambda_game_backend_web,
   ecto_repos: [LambdaGameBackend.Repo],
   generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
-config :lambda_game_backend, LambdaGameBackendWeb.Endpoint,
+config :lambda_game_backend_web, LambdaGameBackendWeb.Endpoint,
   url: [host: "localhost"],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
@@ -46,9 +46,9 @@ config :esbuild,
   version: "0.17.11",
   default: [
     args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
-    cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+      ~w(js/app.js --bundle --target=es2017 --outdir=../lambda_game_backend_web/priv/static/assets --external:/fonts/* --external:/images/*),
+    cd: Path.expand("../lambda_game_backend_web/assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../lambda_game_backend_web/deps", __DIR__)}
   ]
 
 # Configure tailwind (the version is required)
@@ -58,9 +58,9 @@ config :tailwind,
     args: ~w(
       --config=tailwind.config.js
       --input=css/app.css
-      --output=../priv/static/assets/app.css
+      --output=../lambda_game_backend_web/priv/static/assets/app.css
     ),
-    cd: Path.expand("../assets", __DIR__)
+    cd: Path.expand("../lambda_game_backend_web/assets", __DIR__)
   ]
 
 # Configures Elixir's Logger
